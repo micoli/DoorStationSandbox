@@ -10,10 +10,10 @@
 from menu import menu, pygame
 pygame.init()
 pygame.display.set_caption("ADV-MENU Test")
-icon = pygame.Surface((1,1)); icon.set_alpha(0); pygame.display.set_icon(icon)
+icon = pygame.Surface((1,1)); 
+icon.set_alpha(0); 
+pygame.display.set_icon(icon)
 Surface = pygame.display.set_mode((320,200))
-
-Font = pygame.font.Font("mksanstallx.ttf",14)
 
 Items = [('Abc', 'abc', 'button'),
          ('Do something', 'x', 'slider', (2, 0, 10)),
@@ -30,7 +30,8 @@ Items = [('Abc', 'abc', 'button'),
          ('Useless button 7', 'btn', 'button'),
          ('Useless button 8', 'btn', 'button'),
         ]
-result = menu(Surface, Items, 30, 200, 30, 30, 50, 300, Font)
+
+result = menu(Surface, Items, 10, 180, 10, 30, 50, 300, pygame.font.Font("mksanstallx.ttf",12),focus=3,frontcolor=(255, 255, 0),halfcolor=(200, 200, 0),disabledcolor=(155, 155, 0))
 
 if result[0] in ('cancel', 'exit'):
     print "User quitted"
