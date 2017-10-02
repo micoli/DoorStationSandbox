@@ -15,32 +15,56 @@ icon.set_alpha(0);
 pygame.display.set_icon(icon)
 Surface = pygame.display.set_mode((320,200))
 
-Items = [('Abc', 'abc', 'button'),
-         ('Do something', 'x', 'slider', (2, 0, 10)),
-         ('Done', 'p', 'checkbox', True),
-         ('Test', 'name', 'disabled'),
-         ('Cancel', 'cancel', 'cancelbutton'),
-         ('Quit', 'exit', 'button'),
-         ('Useless button 1', 'btn', 'button'),
-         ('Useless button 2', 'btn', 'button'),
-         ('Useless button 3', 'btn', 'button'),
-         ('Useless button 4', 'btn', 'button'),
-         ('Useless button 5', 'btn', 'button'),
-         ('Useless button 6', 'btn', 'button'),
-         ('Useless button 7', 'btn', 'button'),
-         ('Useless button 8', 'btn', 'button'),
-        ]
+'''Items = [('Abc', 'abc', 'button'),
+    ('Do something', 'x', 'slider', (2, 0, 10)),
+    ('Done', 'p', 'checkbox', True),
+    ('Test', 'name', 'disabled'),
+    ('Cancel', 'cancel', 'cancelbutton'),
+    ('Quit', 'exit', 'button'),
+    ('Useless button 1', 'btn', 'button'),
+    ('Useless button 2', 'btn', 'button'),
+    ('Useless button 3', 'btn', 'button'),
+    ('Useless button 4', 'btn', 'button'),
+    ('Useless button 5', 'btn', 'button'),
+    ('Useless button 6', 'btn', 'button'),
+    ('Useless button 7', 'btn', 'button'),
+    ('Useless button 8', 'btn', 'button'),
+]'''
 
-result = menu(Surface, Items, 10, 180, 10, 30, 50, 300, pygame.font.Font("mksanstallx.ttf",12),focus=3,frontcolor=(255, 255, 0),halfcolor=(200, 200, 0),disabledcolor=(155, 155, 0))
+contacts=[
+    ("01 Jaime"                  ,"01234567"),
+    ("02 Velvet Frida Vowell"    ,"01234567"),
+    ("03 Frida Forne"            ,"01234567"),
+    ("04 Marlyn Muldowney 12"    ,"01234567"),
+    ("05 America Ausmus"         ,"01234567"),
+    ("06 Alissa Aberle"          ,"01234567"),
+    ("07 Clarissa Coltuithar"    ,"01234567")
+]
 
-if result[0] in ('cancel', 'exit'):
-    print "User quitted"
-elif result[0] == 'abc':
-    print "User chose Abc"
-elif result[0] == 'name':
-    print "User chose Test"
-print "Slider index:",
-print result[1]['x'].index
-print "Checkbox checked:",
-print result[1]['p'].checked
+title=[
+    "-- L'ORATOIRE --",
+    "   873, Rapine  "
+]
+font = pygame.font.Font("mksanstallx.ttf",12)
+ajfont = pygame.font.Font("mksanstallx.ttf",19)
+Items = [(contact[0],contact,"button") for contact in contacts]
+
+def contactDisplay():
+    Surface.blit(ajfont.render(contact[0][0], True, (200, 200,0)),(15, 40 ),None)
+
+displayMode="contactList"
+while True:
+    if displayMode=="contactList":
+        contact = menu(Surface, Items, 10, 180, 10, 30, 50, 300, font,focus=3,frontcolor=(255, 255, 0),halfcolor=(200, 200, 0),disabledcolor=(155, 155, 0))
+        displayMode="contactConfirmation"
+    elif displayMode=="contactConfirmation":
+        confirmationResult = menu(Surface, [('Appeler','call','button'),('Retour','exit','button')], 140, 180, 100, 30, 50, 150, font,frontcolor=(255, 255, 0),halfcolor=(200, 200, 0),disabledcolor=(155, 155, 0),additionalFunc = contactDisplay)
+        print confirmationResult[0]
+        if confirmationResult[0]=="call":
+            displayMode="call"
+        else:
+            displayMode="contactList"
+    elif displayMode=="call":
+        confirmationResult = menu(Surface, [('Retour','exit','button')], 140, 180, 100, 30, 50, 150, font,frontcolor=(255, 255, 0),halfcolor=(200, 200, 0),disabledcolor=(155, 155, 0),additionalFunc = contactDisplay)
+        displayMode="contactList"
 pygame.quit()

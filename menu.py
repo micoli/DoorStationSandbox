@@ -23,7 +23,7 @@ class chk(object):
     def __init__ (self, checked):
         self.checked = checked
 
-def menu(Surface, Items, Xoffset, Xoffset2, Yoffset, itemheight, totalheight, boxwidth, Font, focus=0,frontcolor=(255, 255, 255),halfcolor=(200, 200, 200),disabledcolor=(155, 155, 155)):
+def menu(Surface, Items, Xoffset, Xoffset2, Yoffset, itemheight, totalheight, boxwidth, Font, focus=0,frontcolor=(255, 255, 255),halfcolor=(200, 200, 200),disabledcolor=(155, 155, 155),backhalfcolor=(200, 200, 200),additionalFunc=None):
     Clock = pygame.time.Clock()
     sliderdata = {}
     for item in Items:
@@ -82,6 +82,8 @@ def menu(Surface, Items, Xoffset, Xoffset2, Yoffset, itemheight, totalheight, bo
                 else:
                     pass
         Surface.fill((0,0,0))
+        if additionalFunc:
+            additionalFunc()
         if Yoffset + focus*totalheight + itemheight > Surface.get_height():
             Ymod = Yoffset + (focus+1)*totalheight + itemheight - Surface.get_height()
         else:
