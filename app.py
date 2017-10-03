@@ -9,29 +9,10 @@
 
 from menu import menu, pygame
 pygame.init()
-pygame.display.set_caption("ADV-MENU Test")
-icon = pygame.Surface((1,1)); 
-icon.set_alpha(0); 
-pygame.display.set_icon(icon)
+pygame.display.set_caption("DoorStation Tester")
 Surface = pygame.display.set_mode((320,200))
 
-'''Items = [('Abc', 'abc', 'button'),
-    ('Do something', 'x', 'slider', (2, 0, 10)),
-    ('Done', 'p', 'checkbox', True),
-    ('Test', 'name', 'disabled'),
-    ('Cancel', 'cancel', 'cancelbutton'),
-    ('Quit', 'exit', 'button'),
-    ('Useless button 1', 'btn', 'button'),
-    ('Useless button 2', 'btn', 'button'),
-    ('Useless button 3', 'btn', 'button'),
-    ('Useless button 4', 'btn', 'button'),
-    ('Useless button 5', 'btn', 'button'),
-    ('Useless button 6', 'btn', 'button'),
-    ('Useless button 7', 'btn', 'button'),
-    ('Useless button 8', 'btn', 'button'),
-]'''
-
-contacts=[
+contacts = [
     ("01 Jaime"                  ,"01234567"),
     ("02 Velvet Frida Vowell"    ,"01234567"),
     ("03 Frida Forne"            ,"01234567"),
@@ -41,30 +22,42 @@ contacts=[
     ("07 Clarissa Coltuithar"    ,"01234567")
 ]
 
-title=[
+title = [
     "-- L'ORATOIRE --",
     "   873, Rapine  "
 ]
+
 font = pygame.font.Font("mksanstallx.ttf",12)
-ajfont = pygame.font.Font("mksanstallx.ttf",19)
-Items = [(contact[0],contact,"button") for contact in contacts]
+bigFont = pygame.font.Font("mksanstallx.ttf",19)
+Items = [(contact[0],k,"button") for k,contact in enumerate(contacts)]
+
+contactIndex = 0
+displayMode = "contactList"
+frontColor = (255, 255, 0)
+halfColor = (200, 200, 0)
+disabledColor = (155, 155, 0)
+foreverLoop = True
 
 def contactDisplay():
-    Surface.blit(ajfont.render(contact[0][0], True, (200, 200,0)),(15, 40 ),None)
+    Surface.blit(bigFont.render(contact[0], True, (200, 200, 0)),(15, 40),None)
 
-displayMode="contactList"
-while True:
-    if displayMode=="contactList":
-        contact = menu(Surface, Items, 10, 180, 10, 30, 50, 300, font,focus=3,frontcolor=(255, 255, 0),halfcolor=(200, 200, 0),disabledcolor=(155, 155, 0))
-        displayMode="contactConfirmation"
-    elif displayMode=="contactConfirmation":
-        confirmationResult = menu(Surface, [('Appeler','call','button'),('Retour','exit','button')], 140, 180, 100, 30, 50, 150, font,frontcolor=(255, 255, 0),halfcolor=(200, 200, 0),disabledcolor=(155, 155, 0),additionalFunc = contactDisplay)
-        print confirmationResult[0]
-        if confirmationResult[0]=="call":
+while foreverLoop:
+    if displayMode == "contactList":
+        contactIndex = menu(Surface, Items, 10, 180, 10, 30, 50, 300, font,focus=contactIndex,frontcolor=frontColor,halfcolor=halfColor,disabledcolor=disabledColor)
+        if contactIndex[0] == "exit" or contactIndex[0] == "cancel":
+            foreverLoop = False
+        else:                        
+            contactIndex=contactIndex[0]
+            contact=Items[contactIndex]
+            displayMode="contactConfirmation"
+    elif displayMode == "contactConfirmation":
+        confirmationResult = menu(Surface, [('Appeler','call','button'),('Retour','cancel','button')], 140, 180, 100, 30, 50, 150, font,frontcolor=frontColor,halfcolor=halfColor,disabledcolor=disabledColor,additionalFunc = contactDisplay)
+        if confirmationResult[0] == "call":
             displayMode="call"
         else:
             displayMode="contactList"
-    elif displayMode=="call":
-        confirmationResult = menu(Surface, [('Retour','exit','button')], 140, 180, 100, 30, 50, 150, font,frontcolor=(255, 255, 0),halfcolor=(200, 200, 0),disabledcolor=(155, 155, 0),additionalFunc = contactDisplay)
+    elif displayMode == "call":
+        confirmationResult = menu(Surface, [('Retour','cancel','button')], 140, 180, 150, 30, 50, 150, font,frontcolor=frontColor,halfcolor=halfColor,disabledcolor=disabledColor,additionalFunc = contactDisplay)
         displayMode="contactList"
+        
 pygame.quit()
