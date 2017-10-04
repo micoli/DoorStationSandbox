@@ -8,9 +8,8 @@
 #pip install cyrusbus
 
 from menu import menu
+import ScreenSaver
 import pygame
-import math
-import random
 import time
 from cyrusbus import Bus
 
@@ -19,6 +18,11 @@ pygame.display.set_caption("DoorStation Tester")
 Surface = pygame.display.set_mode((320,200))
 
 bus = Bus()
+def bus_subscribe(eventName):
+    def tags_decorator(func):
+        bus.subscribe(eventName, func)
+        return func
+    return tags_decorator
 
 contacts = [
     ("01 Jaime"                  ,"01234567"),
@@ -43,7 +47,7 @@ largeFont = pygame.font.Font("mksanstallx.ttf",24)
 Items = [(contact[0],k,"button") for k,contact in enumerate(contacts)]
 
 contactIndex = 0
-displayMode = "contactList"
+displayMode = "contactsList"
 #displayMode = "screensaver"
 frontColor = (255, 255, 0)
 halfColor = (200, 200, 0)
@@ -52,8 +56,6 @@ foreverLoop = True
 
 def contactDisplay():
     Surface.blit(bigFont.render(contact[0], True, (200, 200, 0)),(15, 40),None)
-
-screen_rect = Surface.get_rect()
 
 def blit_text(surface, text, pos, font, justif=0,color=pygame.Color('black')):
     x, y = pos
@@ -72,83 +74,52 @@ def blit_text(surface, text, pos, font, justif=0,color=pygame.Color('black')):
         surface.blit(word_surface, (x-offsetx, y))
         y += word_height  # Start on new row.
 
-class Ball:
-    __slots__ = ('x', 'y', 'v','angle','vx','vy','radius','screen_rect')
-    def __init__ (self, screen_rect,radius):
-        self.screen_rect = screen_rect
-        self.radius=radius
-        self.x = random.randint(self.screen_rect.width/4,self.screen_rect.width*3/4)
-        self.y = random.randint(self.screen_rect.height/4,self.screen_rect.height*3/4)
-        self.v = random.randint(5,10)
-        self.angle = random.random()*2*math.pi
-        self.init()
-        
-    def init(self):
-        self.vx = self.v*math.cos(self.angle)
-        self.vy = self.v*math.sin(self.angle)
-        
-    def move(self):
-        ''' 1
-        4       2
-            3'''
-        self.x += self.vx
-        self.y += self.vy
-        prms=(
-            ('y', 1  , 2  , self.y<self.radius),
-            ('x', 1/2, 3/2, self.x>screen_rect.width-self.radius),
-            ('y', 0  , 1  , self.y>screen_rect.height-self.radius),
-            ('x', 3/2, 5/2, self.x<self.radius)
-        )
-        for p in prms:
-            if(p[3]):
-                if p[0]=='y':
-                    self.vy = -self.vy
-                    self.y += self.vy
-                else:
-                    self.vx = -self.vx
-                    self.x += self.vx
-                if random.randrange(0,100)>80:
-                    self.angle = random.uniform(p[1],p[2])*math.pi
-                    self.init()
-        return
-        
-balls=[]
-for i in range(0,10):
-    balls.append(Ball(screen_rect,6))
+screens={}
+screens["contactsList"] = menu(Surface, "contactsList", bus, Items, 10, 180, 10,  30, 50, 300, font, focus=contactIndex, frontcolor=frontColor, halfcolor=halfColor, disabledcolor=disabledColor)
+screens["callConfirmation"] = menu(Surface, "callConfirmation" ,bus , [('Appeler','call','button'),('Retour','cancel','button')], 140, 180, 100, 30, 50, 150, font,frontcolor=frontColor,halfcolor=halfColor,disabledcolor=disabledColor,additionalFunc = contactDisplay)
+screens["call"] = menu(Surface,'call', bus, [('Retour','cancel','button')], 140, 180, 150, 30, 50, 150, font,frontcolor=frontColor,halfcolor=halfColor,disabledcolor=disabledColor,additionalFunc = contactDisplay)
+screens["screenSaver"] = ScreenSaver.ScreenSaver(Surface,10,6)
 
-
-while foreverLoop:
-    if displayMode == "screensaver" :
-        Surface.fill((0,0,0))
-        for i in range(0,10):
-            balls[i].move()
-            pygame.draw.circle(Surface, pygame.Color("blue"), (int(balls[i].x),int(balls[i].y)), balls[i].radius, 0)
-        blit_text(Surface,"\n".join(title).replace('HH:II',time.strftime("%H:%M")),  (screen_rect.width/2, screen_rect.height/2), largeFont,1,frontColor)
-        pygame.display.update()
-
-        dt = pygame.time.Clock().tick(20) / 1000
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                quit()
-        
-    if displayMode == "contactList":
-        menuContacts = menu(Surface, Items, 10, 180, 10, 30, 50, 300, font,focus=contactIndex,frontcolor=frontColor,halfcolor=halfColor,disabledcolor=disabledColor)
-        contactIndex = menuContacts.run() 
-        if contactIndex[0] == "exit" or contactIndex[0] == "cancel":
+def setScreen(screenName):
+    global displayMode,screens
+    displayMode=screenName
+    screens[displayMode].needToUpdate=True
+    
+@bus_subscribe('gui.menu')
+def menuCallback(bus,menuName,eventType,item=None,data=None,idx=0):
+    global displayMode,callConfirmationMenu,contactsListMenu,contactsListMenu,contact
+    if menuName == "contactsList":
+        if eventType == "exit" or eventType == "cancel":
             foreverLoop = False
-        else:                        
-            contactIndex=contactIndex[0]
-            contact=Items[contactIndex]
-            displayMode="contactConfirmation"
-    elif displayMode == "contactConfirmation":
-        confirmationResultMenu = menu(Surface, [('Appeler','call','button'),('Retour','cancel','button')], 140, 180, 100, 30, 50, 150, font,frontcolor=frontColor,halfcolor=halfColor,disabledcolor=disabledColor,additionalFunc = contactDisplay)
-        confirmationResult = confirmationResultMenu.run()
-        if confirmationResult[0] == "call":
-            displayMode="call"
-        else:
-            displayMode="contactList"
-    elif displayMode == "call":
-        confirmationResult = menu(Surface, [('Retour','cancel','button')], 140, 180, 150, 30, 50, 150, font,frontcolor=frontColor,halfcolor=halfColor,disabledcolor=disabledColor,additionalFunc = contactDisplay)
-        displayMode="contactList"
+        elif eventType == "select" :   
+            contactIndex = idx
+            contact = Items[idx]
+            setScreen("callConfirmation")
+            screens["callConfirmation"].focus=0
+            
+    if menuName == "callConfirmation":
+        if eventType == "select" and item[1] == "call":
+            setScreen("call")
+        else: 
+            setScreen("contactsList")
+
+    if menuName == "call":
+        setScreen("contactsList")
+
+
+setScreen("contactsList")
+while foreverLoop:
+    dt = pygame.time.Clock().tick(10)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            bus.publish('gui.global',when=displayMode,eventType=pygame.QUIT)
+        elif event.type == pygame.KEYDOWN:
+            bus.publish('gui.key',when=displayMode,eventKey=event.key)
+               
+    screens[displayMode].run()
         
 pygame.quit()
+
+
+
+
