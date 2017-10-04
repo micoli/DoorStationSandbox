@@ -44,7 +44,7 @@ Items = [(contact[0],k,"button") for k,contact in enumerate(contacts)]
 
 contactIndex = 0
 displayMode = "contactList"
-displayMode = "screensaver"
+#displayMode = "screensaver"
 frontColor = (255, 255, 0)
 halfColor = (200, 200, 0)
 disabledColor = (155, 155, 0)
@@ -132,7 +132,8 @@ while foreverLoop:
                 quit()
         
     if displayMode == "contactList":
-        contactIndex = menu(Surface, Items, 10, 180, 10, 30, 50, 300, font,focus=contactIndex,frontcolor=frontColor,halfcolor=halfColor,disabledcolor=disabledColor)
+        menuContacts = menu(Surface, Items, 10, 180, 10, 30, 50, 300, font,focus=contactIndex,frontcolor=frontColor,halfcolor=halfColor,disabledcolor=disabledColor)
+        contactIndex = menuContacts.run() 
         if contactIndex[0] == "exit" or contactIndex[0] == "cancel":
             foreverLoop = False
         else:                        
@@ -140,7 +141,8 @@ while foreverLoop:
             contact=Items[contactIndex]
             displayMode="contactConfirmation"
     elif displayMode == "contactConfirmation":
-        confirmationResult = menu(Surface, [('Appeler','call','button'),('Retour','cancel','button')], 140, 180, 100, 30, 50, 150, font,frontcolor=frontColor,halfcolor=halfColor,disabledcolor=disabledColor,additionalFunc = contactDisplay)
+        confirmationResultMenu = menu(Surface, [('Appeler','call','button'),('Retour','cancel','button')], 140, 180, 100, 30, 50, 150, font,frontcolor=frontColor,halfcolor=halfColor,disabledcolor=disabledColor,additionalFunc = contactDisplay)
+        confirmationResult = confirmationResultMenu.run()
         if confirmationResult[0] == "call":
             displayMode="call"
         else:
