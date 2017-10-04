@@ -138,5 +138,3 @@ def menu(Surface, Items, Xoffset, Xoffset2, Yoffset, itemheight, totalheight, bo
             Surface.blit(Font.render(draw_item, True, drawcolor),
                          (Xoffset+15, Yoffset+ 5 + n*totalheight - Ymod))
         pygame.display.flip()
-        
- 
